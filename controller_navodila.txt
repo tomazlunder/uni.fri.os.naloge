@@ -1,0 +1,56 @@
+NADZOROVANJE PROCESOV
+
+V jeziku BASH bi radi napisali skripto, ki bo zagotavljala, da določeni strežniški programi vedno tečejo z določenim številom instanc. Skripta kot argumenta dobi interval v sekundah, kako pogosto bo preverjala število instanc, in imenovan cevovod, preko katerega bo prejemala ukaze.
+
+Primer klica skripte:
+
+controller.sh 1 inputpipe
+V tem primeru skripta v enosekundnih intervalih preverja število instanc, ukaze pa prejema preko cevovoda inputpipe.
+
+Preko cevovoda bo skripta prejemala vrstice z ukazi proc, log, stop in exit. Sintaksa posameznih ukazov:
+
+proc:ciljno_št_procesov:seznam_obstoječih_procesov
+log [last]
+stop:ukazna_vrstica
+exit
+Neznane ukaze ali ukaze z napačnimi argumenti skripta ignorira. 
+Ukaz exit nima argumentov, ukaz log  je lahko brez argumentov ali pa z argumentom last,  ukaz stop kot argument dobi ukazno vrstico s kanonično potjo do programa z argumenti, s katerimi je program pognan. Ukaz proc sprejme kot argumenta (argumenta sta ločena z dvopičji) ciljno število instanc določenega programa in PID vsaj ene že obstoječe instance programa (če je podanih več PIDov, so ločeni z vejicami).
+
+Na primer, da imamo dva procesa xclock s PID 50 in 113 in želimo imeti vedno 3 aktivne instance programa xclock (2 že imamo), pošljemo skripti preko cevovoda naslednji ukaz:
+
+proc:3:50,113
+V tem primeru najprej skripta preveri, če PIDa res pripadata instanci istega programa in preveri tudi, da sta bili obe instanci pognani z istimi argumenti. Npr. če prvi PID pripada instanci programa, ki smo jo pognali kot xclock in drugi PID instanci, ki smo jo pognali kot xclock -digial, sta to instanci istega programa, vendar nista pognani z istimi argumenti. Če katerikoli izmed PIDov ne pripada istemu programu ali ni pognan z istimi argumenti kot ostali, na standardni izhod za napake izpišite "PID matching error: " in  vse PIDe iz ukaza, ki je bil problematičen. Na primer: "PID matching error: 50,113". Če poženemo program xclock absolutno ali relativno z neke lokacije (npr. xclock -digital in /usr/bin/xclock -digital), sta to instanci istega programa, pognani z istimi argumenti. Pri primerjavi se omejimo na kanonično pot do programa in na seznam argumentov, ne bomo pa primerjali okolijskih spremenljivk (npr. PWD, PATH), čeprav se le-te lahko razlikujejo.
+Če se instance ujemajo, potem pa je potrebno doseči ciljno število procesov (v zgornjem primeru 3). Da se sistem ne bo preobremenil zaradi prevelikega števila zagonov v kratkem času, naj se programi zaganjajo v n-sekundnih intervalih (prva nova instanca se požene takoj, druga po n-sekundah, tretja po n-sekundah za drugo itd.). Dolžino intervala smo podali kot prvi argument skripti. Če je število procesov že doseženo (ali preseženo), se ne zgodi nič, razen če število procesov pade pod želeno mejo, v tem primeru začnemo kreirati nove procese. 
+Če preko ukaza proc pošljemo PID procesa, ki je instanca programa z argumenti, ki ga že upravljamo, na standardni izhod za napake izpišemo opozorilo ("Run configuration already exists."), ukaz pa ignoriramo.
+
+Ko prejmemo ukaz log, v datoteko active.log, izpišemo najprej časovno oznako (date +%s%3N), potem pa za vsak program vrstico s kanonično potjo do programa vključno s stikali in vrstico s seznamom vseh PIDov instanc tega programa. PIDe ločite s presledki. Primer izpisa za instanci s PIDoma 50 in 113 programa, ki smo ga pognali kot xclock -digital; poleg tega pa imamo še eno instanco cat -A.
+
+1463135011196
+/usr/bin/xclock -digital
+50 113
+/bin/cat -A
+220
+Če prejmemo ukaz log last, potem zapišemo v datoteko active.log časovno oznako in podatke o procesih, ki se nanašajo samo na zadnji poslani ukaz za zagon procesov preko cevovoda.
+
+Če prejmemo ukaz stop, potem se ustavi nadzor nad pripadajočimi procesi, procesi pa ostanejo aktivni. Na primer, če pošljemo ukaz:
+
+stop:/usr/bin/xclock -digital
+se prekine nadzor nad procesi /usr/bin/xclock -digital, torej ne ustvarjamo več novih procesov, obstoječi procesi pa še vedno ostanejo aktivni. Sedaj lahko z ukazom proc ponovno pošljemo ukaz, ki vzpostavi nadzor nad procesi, če želimo.
+
+Ko prejmemo ukaz exit, se skripta za zaganjanje procesov ukine (procesi, ki jih je upravljala, se prav tako ukinejo s SIGTERM).
+
+ 
+
+Namig: pri reševanju si lahko pomagate z indeksnimi ali asociativnimi tabelami (Bash Reference Manual, poglavje 6.7)
+
+----------------------
+
+Rok za oddajo skripte na eUčilnici je do petka, 27. 5. 2016 do 23:59, zagovori pa bodo od 30. 5 do 2. 6. 2016 v času vaj.
+
+Nalogo delajte samostojno, saj bo na zagovoru potrebno nalogo spremeniti/dopolniti, oziroma se bo naloga nanašala na snov, ki jo zajema domača naloga (za zagovor torej ni nujno, da osnovna domača naloga deluje za vse točke). Kopiranje kode se strogo kaznuje (rezultati antiplagiatorskega sistema so osnova za disciplinsko komisijo).
+
+Skripto shranite v kodnem naboru UTF8, seveda naj bo konec vrstic samo znak za skok v novo vrstico (kot je običajno na sistemih Unix/Linux). Nalogo testirajte vsaj na distribuciji Mint 17.3, vendar pa naj bo skripta prenosljiva, tako da npr. teče tudi na drugih sistemih Debian ali Ubuntu. Oddajte datoteko controller.sh (torej ne zapakirano oz. stisnjeno). 
+
+Pri izdelavi naloge lahko uporabljate BASH, ne smete pa uporabljati drugih programskih jezikov (izjema sta sed in awk, v kolikor si z njima zgolj pomagate). Komunikacija s pomočjo začasnih datotek ni dobra praksa zaradi počasnosti (razen, če procesa ne tečeta sočasno) in se kaznuje z odbitkom točk.
+
+Pri testiranju skripte si lahko pomagate s testno skripto dn3test.sh, ki ji kot argument podate pot do vaše izvedljive skripte. Če poganjate skripto v virtualki na kakšnem starejšem računalniku, so lahko časi čakanja, da se podatki zapišejo v datoteko tudi malo daljši. V tem primeru lahko povečate vrednost spremenljivke sleepinterval. Nekateri testi niso neodvisni en od drugega, zato lahko napaka pri enem testu povzroči, da pade tudi nekaj testov, ki mu sledijo.

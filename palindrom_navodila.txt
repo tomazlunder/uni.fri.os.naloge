@@ -1,0 +1,45 @@
+PALINDROM
+
+Preveriti želimo, če je beseda oziroma besedilo palindrom. Izraz je palindrom, če se bere enako od spredaj in zadaj. Verjetno najbolj znan palindrom je "Perica reze raci rep". Napišite skripto v bashu z imenom naloga.sh, ki kot argument prejme besedo ali besedilo in preveri, če je le-ta palindrom. 
+
+Predpostavite, da je besedilo na vhodu zapisano z malimi črkami in brez presledkov ter ločil.
+
+Če pokličete skripto brez argumentov, javite naslednjo napako:
+“Podajte argument” ter vrnite izhodni status 1.
+
+Če je argumentov ob klicu skripte več kot le en, javite naslednjo napako:
+“St. arg. mora biti 1” ter vrnite status, ki je enak številu argumentov.
+
+Če je argument dolg le en znak, potem javite naslednjo napako:
+“Argument mora biti daljsi od le enega znaka” ter vrnite status 255.
+
+Vedno javite le prvo napako, ki jo zaznate. Vrstni red preverjanj mora biti enak zgornjemu.
+
+Namig: 
+Uporabite lahko poljubne ukaze in se vam ni treba omejevati le na do sedaj obdelano snov. Konceptualno poznate vse že iz Programiranja I, že na vajah #5 pa bomo uporabili vse programske stavke.
+
+Primeri klicev in izhodov:
+— — —
+$ ./naloga.sh pericarezeracirep
+pericarezeracirep JE palindrom
+
+$ ./naloga.sh operacijskisistemi
+operacijskisistemi NI palindrom
+
+$ ./naloga.sh
+Podajte argument
+
+$ ./naloga.sh a
+Argument mora biti daljsi od le enega znaka
+
+$ ./naloga.sh a b
+St. arg. mora biti 1
+— — —
+
+Rok za oddajo skripte naloga.sh (in nič drugega, nobene zip datoteke ali kaj podobnega) na eUčilnici je do petka 1. 4. 2016 do 23:55, zagovori pa bodo od 4. do 7. 4. 2016 v času vaj. 
+
+Nalogo delajte samostojno, saj bo na zagovoru potrebno nalogo spremeniti/dopolniti z novimi funkcionalnostmi. Kopiranje kode preverja zelo učinkovit antiplagiatorski sistem in se strogo kaznuje.
+
+Skripto shranite v UTF8 kodnem naboru na Linuxu ter jo preizkusite na distribuciji Mint 17.3, ki jo uporabljamo na vajah, kjer bodo potekali tudi zagovori.
+
+Pri testiranju osnovnega delovanja vaše rešitve lahko uporabljate datoteko dn1test.sh, ki se nahaja na glavni strani predmeta na eUčilnici v poglavju, ki je namenjen 1. domači nalogi. Uporaba je zelo priporočljiva, saj na podoben način tudi izvajalci predmeta naredimo končno ocenjevanje vaših oddaj.
